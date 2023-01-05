@@ -32,7 +32,7 @@ public class AirportCode {
 
         // 2
         urlBuilder.append("?" + URLEncoder.encode("ServiceKey", "UTF-8") + "=" + ServiceKey);
-        urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("10", "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("15", "UTF-8"));
 
         // 3
         URL url = new URL(urlBuilder.toString());
@@ -65,15 +65,15 @@ public class AirportCode {
         rd.close();
         connection.disconnect();
 
-        System.out.println("stringBuilder = " + stringBuilder);
-        System.out.println("stringBuilderClassName = " + stringBuilder.getClass().getName());
+//        System.out.println("stringBuilder = " + stringBuilder);
+//        System.out.println("stringBuilderClassName = " + stringBuilder.getClass().getName());
 
         // 8
         JSONObject jsonObject = XML.toJSONObject(stringBuilder.toString());
         String xmlJSONObject = jsonObject.toString();
-        System.out.println("\"============================\" = " + "============================");
-
-        System.out.println("xmlJSONObject = " + xmlJSONObject);
+//        System.out.println("\"============================\" = " + "============================");
+//
+//        System.out.println("xmlJSONObject = " + xmlJSONObject);
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> map = new HashMap<>();
@@ -90,6 +90,17 @@ public class AirportCode {
         // 11
         resultMap.put("body", body);
 
-        return resultMap;
+        Map<String, Object> items = (Map<String, Object>) body.get("items");
+        List<Map<String, Object>> item = (List<Map<String,java.lang.Object>>) items.get("item");
+
+//        int index;
+//
+//        for(int i=0; i<item.size(); i++){
+//            if(item.get(i).get("cityKor")){
+//               index = i;
+//            }
+//        }
+
+        return items;
     }
 }
