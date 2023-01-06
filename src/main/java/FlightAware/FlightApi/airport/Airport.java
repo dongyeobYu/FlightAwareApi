@@ -11,4 +11,9 @@ public interface Airport {
 
     Map<String, Object> retrunAirPortCode() throws Exception;
 
+    Map<String, Object> DomesticStatus(String date, String deptCode, String ArrCode, String AirLine, String AirLineNum) throws Exception;
+
+
+    Map<String, Object> InternationStatus() throws Exception;
+
 }
