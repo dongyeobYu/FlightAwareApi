@@ -16,8 +16,6 @@ function CodeList(){
             }
 
             $(".smallbox").html(str);
-
         }
-
     })
 }
