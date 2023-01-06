@@ -137,6 +137,7 @@ public class AirportCode implements Airport {
         map = objectMapper.readValue(xmlJSONObject, new TypeReference<>() {});
         Map<String, Object> response = (Map<String, Object>) map.get("response");
         Map<String, Object> body = (Map<String, Object>) response.get("body");
+        Map<String, Object> item = (Map<String, Object>) body.get("item");
 
 
         return body;
@@ -183,9 +184,9 @@ public class AirportCode implements Airport {
         map = objectMapper.readValue(xmlJSONObject, new TypeReference<>() {});
         Map<String, Object> response = (Map<String, Object>) map.get("response");
         Map<String, Object> body = (Map<String, Object>) response.get("body");
+        Map<String, Object> item = (Map<String, Object>) body.get("items");
 
-
-        return body;
+        return item;
     }
 
     public Map<String, Object> InternationStatus() throws Exception {

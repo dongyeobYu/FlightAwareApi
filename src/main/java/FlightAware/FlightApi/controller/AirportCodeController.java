@@ -3,7 +3,9 @@ package FlightAware.FlightApi.controller;
 import FlightAware.FlightApi.airport.Airport;
 import FlightAware.FlightApi.airport.AirportCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -25,8 +27,20 @@ public class AirportCodeController {
     }
 
     @GetMapping("/domestic")
-    public Map<String, Object> cDomestic() throws Exception{
-        return airport.DomesticStatus("20230116", "CJU", "GMP", "OZ", "8900");
+    public Map<String, Object> cDomestic(
+            @RequestParam("date") String date,
+            @RequestParam("deptCode") String deptCode,
+            @RequestParam("ArrCode") String Arrcode,
+            @RequestParam("AirLine") String AirLine,
+            @RequestParam("AirLineNum") String AirLineNum) throws Exception{
+
+        return airport.DomesticStatus(
+                date,
+                deptCode,
+                Arrcode,
+                AirLine,
+                AirLineNum
+        );
     }
 
     @GetMapping("/Internation")

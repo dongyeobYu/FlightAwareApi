@@ -7,9 +7,38 @@
     <title>Title</title>
 </head>
 <body>
-    <button type="button" onclick="CodeList()"> 항공 코드 조회 </button>
-    <div class="smallbox">
+    <div class="codeList" style="border: 1px solid gold; float: left; width: 40%">
+        <button type="button" onclick="CodeList()"> 항공 코드 조회 </button>
+        <div class="smallbox">
 
+        </div>
+    </div>
+
+    <div class="List" style="border: 1px solid silver; float: left; width: 40%">
+
+            <div class="form-group">
+                <label th:for="date"> date </label>
+                <input type="text" id="date" name="date" placeholder="ex)20230101">
+                </br>
+                <label th:for="deptCode"> deptCode </label>
+                <input type="text" id="deptCode" name="deptCode" placeholder="ex)CJU">
+                </br>
+                <label th:for="ArrCode"> ArrCode </label>
+                <input type="text" id="ArrCode" name="ArrCode" placeholder="ex)GMP">
+                </br>
+                <label th:for="AirLine"> AirLine </label>
+                <input type="text" id="AirLine" name="AirLine" placeholder="ex)OZ">
+                </br>
+                <label th:for="AirLineNum"> AirLineNum </label>
+                <input type="text" id="AirLineNum" name="AirLineNum" placeholder="ex)8900">
+            </div>
+
+            <button type="button" onclick="FindDomestic()"> 찾기 </button>
+        </form>
+
+        <div class="domesticBox">
+
+        </div>
     </div>
 </body>
 </html>
