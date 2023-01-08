@@ -4,20 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.json.XML;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.XMLFormatter;
+import java.util.*;
 
 @Service
 public class AirportCode implements Airport {
@@ -26,30 +20,23 @@ public class AirportCode implements Airport {
 
         /** URL */      // 1
         StringBuilder urlBuilder =
-                new StringBuilder("http://openapi.airport.co.kr/service/rest/AirportCodeList/getAirportCodeList");
+                new StringBuilder(codeURL);
 
         // 2
         urlBuilder.append("?" + URLEncoder.encode("ServiceKey", "UTF-8") + ServiceKey);
-        urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("15", "UTF-8"));
+        urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("2000", "UTF-8"));
 
         // 3
         URL url = new URL(urlBuilder.toString());
 
         // 4
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("Content-Type", "application/json");
+        setConnection(connection);
 
         System.out.println("connection.getResponseCode() = " + connection.getResponseCode());   // 응답 코드 출력
 
-        // 5
-        BufferedReader rd;
-
-        if(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 300){
-            rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        } else{
-            rd = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-        }
+        // 5s
+        BufferedReader rd = BufferedReaderGetStream(connection);
 
         StringBuilder stringBuilder = new StringBuilder();
         String line;
@@ -97,7 +84,7 @@ public class AirportCode implements Airport {
     }
 
     public Map<String, Object> returnAirPortList() throws Exception {
-        StringBuilder urlBuilder = new StringBuilder("http://openapi.airport.co.kr/service/rest/FlightStatusList/getFlightStatusList");
+        StringBuilder urlBuilder = new StringBuilder(AirPortURL);
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + ServiceKey); /*Service Key*/
         urlBuilder.append("&" + URLEncoder.encode("schLineType","UTF-8") + "=" + URLEncoder.encode("D", "UTF-8")); /*국내 / 국제*/
         urlBuilder.append("&" + URLEncoder.encode("schIOType","UTF-8") + "=" + URLEncoder.encode("I", "UTF-8")); /*도착 / 출발*/
@@ -107,26 +94,20 @@ public class AirportCode implements Airport {
 
 
         URL url = new URL(urlBuilder.toString());
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Content-type", "application/json");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        setConnection(connection);
 
-        BufferedReader rd;
-
-        if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        } else {
-            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-        }
+        BufferedReader rd = BufferedReaderGetStream(connection);
 
         StringBuilder sb = new StringBuilder();
         String line;
+
         while ((line = rd.readLine()) != null) {
             sb.append(line);
         }
 
         rd.close();
-        conn.disconnect();
+        connection.disconnect();
 
         JSONObject jsonObject = XML.toJSONObject(sb.toString());
         String xmlJSONObject = jsonObject.toString();
@@ -144,7 +125,7 @@ public class AirportCode implements Airport {
     }
 
     public Map<String, Object> DomesticStatus(String date, String deptCode, String ArrCode, String AirLine, String AirLineNum) throws Exception {
-        StringBuilder urlBuilder = new StringBuilder("http://openapi.airport.co.kr/service/rest/FlightScheduleList/getDflightScheduleList");
+        StringBuilder urlBuilder = new StringBuilder(domesticURL);
         urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + ServiceKey); /*Service Key*/
         urlBuilder.append("&" + URLEncoder.encode("schDate","UTF-8") + "=" + URLEncoder.encode(date, "UTF-8")); /*검색일자*/
         urlBuilder.append("&" + URLEncoder.encode("schDeptCityCode","UTF-8") + "=" + URLEncoder.encode(deptCode, "UTF-8")); /*도착 도시 코드*/
@@ -154,17 +135,10 @@ public class AirportCode implements Airport {
 
 
         URL url = new URL(urlBuilder.toString());
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Content-type", "application/json");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        setConnection(connection);
 
-        BufferedReader rd;
-
-        if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        } else {
-            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-        }
+        BufferedReader rd = BufferedReaderGetStream(connection);
 
         StringBuilder sb = new StringBuilder();
         String line;
@@ -173,7 +147,7 @@ public class AirportCode implements Airport {
         }
 
         rd.close();
-        conn.disconnect();
+        connection.disconnect();
 
         JSONObject jsonObject = XML.toJSONObject(sb.toString());
         String xmlJSONObject = jsonObject.toString();
@@ -189,49 +163,113 @@ public class AirportCode implements Airport {
         return item;
     }
 
-    public Map<String, Object> InternationStatus() throws Exception {
-        StringBuilder urlBuilder = new StringBuilder("http://openapi.airport.co.kr/service/rest/FlightScheduleList/getIflightScheduleList");
-        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + ServiceKey); /*Service Key*/
-        urlBuilder.append("&" + URLEncoder.encode("schDate","UTF-8") + "=" + URLEncoder.encode("20121010", "UTF-8")); /*검색일자*/
-        urlBuilder.append("&" + URLEncoder.encode("schDeptCityCode","UTF-8") + "=" + URLEncoder.encode("GMP", "UTF-8")); /*도착 도시 코드*/
-        urlBuilder.append("&" + URLEncoder.encode("schArrvCityCode","UTF-8") + "=" + URLEncoder.encode("PUS", "UTF-8")); /*출항 도시 코드*/
-        urlBuilder.append("&" + URLEncoder.encode("schAirLine","UTF-8") + "=" + URLEncoder.encode("AB", "UTF-8")); /*항공편 코드*/
-        urlBuilder.append("&" + URLEncoder.encode("schFlightNum","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*항공편 넘버*/
+//    public Map<String, Object> InternationStatus() throws Exception {
+//        StringBuilder urlBuilder = new StringBuilder("http://openapi.airport.co.kr/service/rest/FlightScheduleList/getIflightScheduleList");
+//        urlBuilder.append("?" + URLEncoder.encode("serviceKey","UTF-8") + ServiceKey); /*Service Key*/
+//        urlBuilder.append("&" + URLEncoder.encode("schDate","UTF-8") + "=" + URLEncoder.encode("20121010", "UTF-8")); /*검색일자*/
+//        urlBuilder.append("&" + URLEncoder.encode("schDeptCityCode","UTF-8") + "=" + URLEncoder.encode("GMP", "UTF-8")); /*도착 도시 코드*/
+//        urlBuilder.append("&" + URLEncoder.encode("schArrvCityCode","UTF-8") + "=" + URLEncoder.encode("PUS", "UTF-8")); /*출항 도시 코드*/
+//        urlBuilder.append("&" + URLEncoder.encode("schAirLine","UTF-8") + "=" + URLEncoder.encode("AB", "UTF-8")); /*항공편 코드*/
+//        urlBuilder.append("&" + URLEncoder.encode("schFlightNum","UTF-8") + "=" + URLEncoder.encode("1", "UTF-8")); /*항공편 넘버*/
+//
+//
+//        URL url = new URL(urlBuilder.toString());
+//        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//        setConnection(conn)
+//
+//        BufferedReader rd = BufferedReaderGetStream(connection);
+//
+//        StringBuilder sb = new StringBuilder();
+//        String line;
+//        while ((line = rd.readLine()) != null) {
+//            sb.append(line);
+//        }
+//
+//        rd.close();
+//        conn.disconnect();
+//
+//        JSONObject jsonObject = XML.toJSONObject(sb.toString());
+//        String xmlJSONObject = jsonObject.toString();
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Map<String, Object> map;
+//
+//        map = objectMapper.readValue(xmlJSONObject, new TypeReference<>() {});
+//        Map<String, Object> response = (Map<String, Object>) map.get("response");
+//        Map<String, Object> body = (Map<String, Object>) response.get("body");
+//
+//
+//        return body;
+//    }
 
+    public String findDeptCodeByName(String cityKor) throws Exception{
+        StringBuilder urlBuilder =
+                new StringBuilder(codeURL);
+
+        urlBuilder.append("?" + URLEncoder.encode("ServiceKey", "UTF-8") + ServiceKey);
+        urlBuilder.append("&" + URLEncoder.encode("numOfRows", "UTF-8") + "=" + URLEncoder.encode("2000", "UTF-8"));
 
         URL url = new URL(urlBuilder.toString());
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Content-type", "application/json");
 
-        BufferedReader rd;
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        setConnection(connection);
 
-        if(conn.getResponseCode() >= 200 && conn.getResponseCode() <= 300) {
-            rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-        } else {
-            rd = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
-        }
+        BufferedReader rd = BufferedReaderGetStream(connection);
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         String line;
-        while ((line = rd.readLine()) != null) {
-            sb.append(line);
+
+        while( (line = rd.readLine()) != null){
+            stringBuilder.append(line);
         }
 
         rd.close();
-        conn.disconnect();
+        connection.disconnect();
 
-        JSONObject jsonObject = XML.toJSONObject(sb.toString());
+        JSONObject jsonObject = XML.toJSONObject(stringBuilder.toString());
         String xmlJSONObject = jsonObject.toString();
 
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, Object> map;
+        Map<String, Object> map = new HashMap<>();
 
         map = objectMapper.readValue(xmlJSONObject, new TypeReference<>() {});
-        Map<String, Object> response = (Map<String, Object>) map.get("response");
-        Map<String, Object> body = (Map<String, Object>) response.get("body");
 
+        Map<String, Object> dataResponse = (Map<String, Object>) map.get("response");
+        Map<String, Object> body = (Map<String, Object>) dataResponse.get("body");
 
-        return body;
+        Map<String, Object> resultMap = new HashMap<>();
+
+        resultMap.put("body", body);
+
+        Map<String, Object> items = (Map<String, Object>) body.get("items");
+        List<Map<String, Object>> item = (List<Map<String,java.lang.Object>>) items.get("item");
+
+        return getCityCodeFromcityKor(item, cityKor);
+    }
+
+    public static void setConnection(HttpURLConnection connection) throws Exception {
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Content-Type", "application/json");
+    }
+
+    public String getCityCodeFromcityKor(List<Map<String, Object>> item, String cityKor){
+        for(Map<String, Object> ite : item) {
+            if((ite.get("cityKor").toString()).indexOf((cityKor)) >= 0){
+                System.out.println("ite = " + ite);
+                return (String) ite.get("cityCode");
+            }
+        }
+        return null;
+    }
+
+    public BufferedReader BufferedReaderGetStream(HttpURLConnection connection) throws Exception{
+        BufferedReader rd;
+        if(connection.getResponseCode() >= 200 && connection.getResponseCode() <= 300){
+            rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        } else{
+            rd = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+        }
+
+        return rd;
     }
 }

@@ -43,10 +43,10 @@ public class AirportCodeController {
         );
     }
 
-    @GetMapping("/Internation")
-    public Map<String, Object> cInternation() throws Exception{
-        return airport.InternationStatus();
-    }
+//    @GetMapping("/Internation")
+//    public Map<String, Object> cInternation() throws Exception{
+//        return airport.InternationStatus();
+//    }
 
 
 }
